@@ -71,7 +71,7 @@ if st.button("🔍 Analizar participación"):
         respuestas_comp = respuestas if match_exacto else [normalizar(r) for r in respuestas]
 
         for mensaje in mensajes:
-            mensaje = mensaje.strip()
+            mensaje = mensaje.replace("\n", " ").strip()
             if not mensaje:
                 continue
 
