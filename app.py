@@ -19,7 +19,7 @@ def limpiar_texto(texto):
 
 # --- Diccionarios predefinidos ---
 ALUMNOS = {
-    "h: ~criiz🗺️": "🗺️",
+    "h ~criiz🗺️": "🗺️",
     "Cangu 🦘🇵🇦 Ilvermorny": "🦘",
     "Gris 🦄🇻🇪 Warriors": "🦄",
     "Gwen FG 🦖🐬🇲🇽 Wampus": "🦖",
