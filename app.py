@@ -1,7 +1,6 @@
 import streamlit as st
 import re
 
-# Casas y sus emojis
 CASAS = {
     "Wampus": ["❤️", "♥️"],
     "Thunder": ["💙"],
@@ -9,7 +8,6 @@ CASAS = {
     "Serpientes": ["💚"]
 }
 
-# Lista completa de alumnos y sus emojis
 ALUMNOS = {
     "h: ~criiz🗺️": "🗺️",
     "Cangu 🦘🇵🇦 Ilvermorny": "🦘",
@@ -37,35 +35,27 @@ ALUMNOS = {
 
 st.title("📊 Contador de Participaciones en Dinámica")
 
-# Elegir casa
 casa = st.selectbox("Selecciona tu casa", list(CASAS.keys()))
 emojis_casa = CASAS[casa]
-
-# Nombre de la dinámica
 nombre_ronda = st.text_input("Nombre de la dinámica")
-
-# Número de rondas
 num_rondas = st.number_input("Número de rondas", min_value=1, step=1)
 
-# Respuestas correctas por ronda
-st.subheader("✅ Respuestas correctas por ronda (una respuesta por línea)")
+st.subheader("✅ Respuestas correctas por ronda (una por línea)")
 respuestas_correctas = []
 for i in range(num_rondas):
     respuestas = st.text_area(f"Ronda {i+1}", height=100)
     respuestas_correctas.append([line.strip() for line in respuestas.strip().splitlines() if line.strip()])
 
-# Texto de la dinámica
 st.subheader("📄 Texto completo de la dinámica")
 texto_dinamica = st.text_area("Pega aquí todo el texto (incluye los timestamps)", height=500)
 
-# Checkbox para coincidencia exacta
 match_exacto = st.checkbox("Coincidencia exacta (distingue mayúsculas y minúsculas)", value=False)
 
 if st.button("🔍 Analizar participación"):
     mensajes = re.split(r"\[\d{1,2}:\d{2}, \d{1,2}/\d{1,2}(?:/\d{4})?\]", texto_dinamica)[1:]
 
-    resultados = {}
     desglose = {alumno: [False]*num_rondas for alumno in ALUMNOS}
+    mensajes_match = {alumno: [[] for _ in range(num_rondas)] for alumno in ALUMNOS}
     usados_wampus = set()
     usados_rivales = set()
 
@@ -87,22 +77,32 @@ if st.button("🔍 Analizar participación"):
                 for alumno, emoji in ALUMNOS.items():
                     emoji_comp = emoji if match_exacto else emoji.lower()
                     if emoji_comp in mensaje_comp:
-                        desglose[alumno][idx_ronda] = True
+                        if not desglose[alumno][idx_ronda]:
+                            desglose[alumno][idx_ronda] = True
+                            mensajes_match[alumno][idx_ronda].append(mensaje)
 
-                        if any(e in mensaje for e in CASAS["Wampus"]):
-                            usados_wampus.add(emoji)
-                        elif any(e in mensaje for casa in ["Thunder", "Pukukis", "Serpientes"] for e in CASAS[casa]):
-                            usados_rivales.add(emoji)
+                            if any(e in mensaje for e in CASAS["Wampus"]):
+                                usados_wampus.add(emoji)
+                            elif any(e in mensaje for casa in ["Thunder", "Pukukis", "Serpientes"] for e in CASAS[casa]):
+                                usados_rivales.add(emoji)
+
+    mostrar_resumen = st.checkbox("Mostrar resumen compacto (solo emoji y resultado)")
 
     st.subheader("📋 Resultados por alumno")
     for alumno, emoji in ALUMNOS.items():
         aciertos = sum(desglose[alumno])
         tiene_parti = aciertos >= 5
-        st.write(f"{emoji} {'✅' if tiene_parti else '❌'} — {aciertos} participaciones correctas")
+        resumen = f"{emoji} {'✅' if tiene_parti else '❌'} ({aciertos})"
 
-        if st.checkbox(f"Ver detalle por ronda para {emoji}", key=alumno):
-            for i, estado in enumerate(desglose[alumno]):
-                st.write(f"Ronda {i+1}: {'✔️' if estado else '❌'}")
+        if mostrar_resumen:
+            st.write(resumen)
+        else:
+            st.write(f"{resumen} — {alumno}")
+            if st.checkbox(f"Ver detalle por ronda para {emoji}", key=emoji):
+                for i, estado in enumerate(desglose[alumno]):
+                    st.write(f"Ronda {i+1}: {'✔️' if estado else '❌'}")
+                    if estado:
+                        st.text_area(f"Mensajes que hicieron match en Ronda {i+1}", "\n\n".join(mensajes_match[alumno][i]), height=150)
 
     st.subheader("🏠 Estadísticas por casa")
     st.write(f"Total de participantes con emojis de Wampus (❤️, ♥️): {len(usados_wampus)}")
