@@ -68,26 +68,37 @@ if st.button("🔍 Analizar participación"):
 
     for idx_ronda in range(num_rondas):
         respuestas = respuestas_correctas[idx_ronda]
+        respuestas_comp = respuestas if match_exacto else [normalizar(r) for r in respuestas]
+
         for mensaje in mensajes:
             mensaje = mensaje.strip()
             if not mensaje:
                 continue
 
             mensaje_comp = normalizar(mensaje)
-            respuestas_comp = respuestas if match_exacto else [normalizar(r) for r in respuestas]
-            contiene_respuesta = any(r in mensaje_comp for r in respuestas_comp)
-            contiene_emocasa = any(normalizar(e) in mensaje_comp for e in emojis_casa)
+
+            # Extraer remitente
+            if ":" in mensaje:
+                remitente = mensaje.split(":")[0].strip()
+            else:
+                continue  # saltar si no hay remitente claro
 
             for alumno, emoji in ALUMNOS.items():
-                if normalizar(emoji) in mensaje_comp:
+                if remitente.startswith(alumno):
+                    contiene_respuesta = any(r in mensaje_comp for r in respuestas_comp)
+                    contiene_emocasa = any(normalizar(e) in mensaje_comp for e in emojis_casa)
+
                     mensajes_totales[alumno][idx_ronda].append(mensaje)
+
                     if contiene_respuesta and contiene_emocasa and not desglose[alumno][idx_ronda]:
                         desglose[alumno][idx_ronda] = True
                         mensajes_match[alumno][idx_ronda].append(mensaje)
+
                         if any(e in mensaje for e in CASAS["Wampus"]):
                             usados_wampus.add(emoji)
                         elif any(e in mensaje for casa in ["Thunder", "Pukukis", "Serpientes"] for e in CASAS[casa]):
                             usados_rivales.add(emoji)
+                    break
 
     mostrar_resumen = st.checkbox("Mostrar resumen compacto (solo emoji y resultado)")
 
@@ -148,6 +159,5 @@ if st.button("🔍 Analizar participación"):
                     if any(normalizar(e) in mensaje_comp for e in casa_emojis):
                         correctos_por_casa[casa] += 1
                         break
-
     for casa, count in correctos_por_casa.items():
         st.write(f"{casa}: {count} respuestas correctas")
