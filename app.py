@@ -19,7 +19,7 @@ def limpiar_texto(texto):
 
 # --- Diccionarios predefinidos ---
 ALUMNOS = {
-    "h ~criiz🗺️": "🗺️",
+    "h: ~criiz🗺️": "🗺️",
     "Cangu 🦘🇵🇦 Ilvermorny": "🦘",
     "Gris 🦄🇻🇪 Warriors": "🦄",
     "Gwen FG 🦖🐬🇲🇽 Wampus": "🦖",
@@ -91,7 +91,7 @@ if st.button("🔍 Analizar participación"):
                 continue
 
             for alumno, emoji in ALUMNOS.items():
-                if normalizar(remitente) == normalizar(alumno):
+                if normalizar(remitente) in normalizar(alumno) or normalizar(alumno) in normalizar(remitente):
                     mensajes_totales[alumno][idx_ronda].append(mensaje)
                     contiene_respuesta = any(r in mensaje_comp for r in respuestas_comp)
                     contiene_emocasa = any(normalizar(e) in mensaje_comp for e in emojis_casa)
@@ -103,6 +103,7 @@ if st.button("🔍 Analizar participación"):
                         for c, emojilist in CASAS.items():
                             if any(normalizar(e) in mensaje_comp for e in emojilist):
                                 aciertos_por_casa[c] += 1
+                                break
 
                         if any(normalizar(e) in mensaje_comp for e in CASAS["Wampus"]):
                             usados_wampus.add(emoji)
@@ -131,7 +132,7 @@ if st.button("🔍 Analizar participación"):
 
     st.subheader("📌 Estadísticas generales")
     st.markdown(f"**Casa seleccionada:** {casa} {' '.join(emojis_casa)}")
-    cantidad_alumnos = sum(1 for emoji in ALUMNOS.values() if emoji in emojis_casa)
+    cantidad_alumnos = sum(1 for alumno, emoji in ALUMNOS.items() if emoji in emojis_casa)
     st.markdown(f"**Alumnos en esta casa:** {cantidad_alumnos}")
     st.markdown(f"**Wampus:** {len(usados_wampus)} personas")
     st.markdown(f"**Rivales:** {len(usados_rivales)} personas")
