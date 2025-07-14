@@ -69,6 +69,7 @@ if st.button("🔍 Analizar participación"):
     participantes_por_casa = defaultdict(set)
     usados_wampus = set()
     usados_rivales = set()
+    emojis_por_ronda = defaultdict(list)
 
     for idx_ronda in range(num_rondas):
         respuestas = respuestas_correctas[idx_ronda]
@@ -88,6 +89,12 @@ if st.button("🔍 Analizar participación"):
 
             cuerpo_normalizado = normalizar(cuerpo)
             contiene_respuesta = any(r in cuerpo_normalizado for r in respuestas_comp)
+
+            # Registrar todos los emojis de casa que aparecen en el mensaje
+            for c, emojilist in CASAS.items():
+                for emoji in emojilist:
+                    if emoji in cuerpo:
+                        emojis_por_ronda[idx_ronda].append(emoji)
 
             if contiene_respuesta:
                 for c, emojilist in CASAS.items():
@@ -135,3 +142,8 @@ if st.button("🔍 Analizar participación"):
         st.markdown(f"**{casa_nombre} {casa_emojis}:** {cuenta} respuestas correctas por {participantes} participantes")
 
     st.code(f"{nombre_dinamica}\n{resumen.strip()}", language="text")
+
+    st.subheader("📊 Otros emojis por ronda")
+    for i in range(num_rondas):
+        if emojis_por_ronda[i]:
+            st.code(f"Ronda {i+1}: {''.join(emojis_por_ronda[i])}")
