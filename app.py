@@ -48,7 +48,7 @@ CASAS = {
     "Wampus": ["❤️", "♥️"],
     "Thunder": ["💙"],
     "Pukukis": ["💛"],
-    "Serpies": ["💚"]
+    "Serpientes": ["💚"]
 }
 
 # --- Interfaz ---
@@ -92,7 +92,7 @@ if st.button("🔍 Analizar participación"):
                 continue
 
             for alumno, emoji in ALUMNOS.items():
-                if normalizar(remitente).startswith(normalizar(alumno)):
+                if normalizar(remitente) == normalizar(alumno):
                     mensajes_totales[alumno][idx_ronda].append(mensaje)
                     contiene_respuesta = any(r in mensaje_comp for r in respuestas_comp)
                     contiene_emocasa = any(normalizar(e) in mensaje_comp for e in emojis_casa)
@@ -102,12 +102,12 @@ if st.button("🔍 Analizar participación"):
                         mensajes_match[alumno][idx_ronda].append(mensaje)
 
                         for c, emojilist in CASAS.items():
-                            if any(e in mensaje for e in emojilist):
+                            if any(normalizar(e) in mensaje_comp for e in emojilist):
                                 aciertos_por_casa[c] += 1
 
-                        if any(e in mensaje for e in CASAS["Wampus"]):
+                        if any(normalizar(e) in mensaje_comp for e in CASAS["Wampus"]):
                             usados_wampus.add(emoji)
-                        elif any(e in mensaje for casa_r in ["Thunder", "Pukukis", "Serpientes"] for e in CASAS[casa_r]):
+                        elif any(normalizar(e) in mensaje_comp for casa_r in ["Thunder", "Pukukis", "Serpientes"] for e in CASAS[casa_r]):
                             usados_rivales.add(emoji)
                     else:
                         mensajes_no_match[alumno][idx_ronda].append(mensaje)
@@ -137,6 +137,7 @@ if st.button("🔍 Analizar participación"):
     st.markdown(f"**Wampus:** {len(usados_wampus)} personas")
     st.markdown(f"**Rivales:** {len(usados_rivales)} personas")
     for casa_nombre, cuenta in aciertos_por_casa.items():
-        st.markdown(f"**{casa_nombre}:** {cuenta} respuestas correctas")
+        casa_emojis = ' '.join(CASAS[casa_nombre])
+        st.markdown(f"**{casa_nombre} {casa_emojis}:** {cuenta} respuestas correctas")
 
     st.text_area("📋 Resumen final (para copiar)", value=f"{nombre_dinamica}\n{resumen.strip()}", height=200)
