@@ -42,7 +42,8 @@ CASAS = {
     "Wampus": ["❤️", "♥️"],
     "Thunder": ["💙"],
     "Pukukis": ["💛"],
-    "Serpies": ["💚"]
+    "Serpies": ["💚"],
+    "Directoras": ["🖤"]
 }
 
 # --- Interfaz ---
@@ -91,15 +92,15 @@ if st.button("🔍 Analizar participación"):
             if contiene_respuesta:
                 for c, emojilist in CASAS.items():
                     if any(e in cuerpo for e in emojilist):
+                        aciertos_por_casa[c] += 1
+                        participantes_por_casa[c].add(remitente)
                         if remitente in ALUMNOS:
                             desglose[remitente][idx_ronda] = True
                             mensajes_match[remitente][idx_ronda].append(mensaje)
-                        aciertos_por_casa[c] += 1
-                        participantes_por_casa[c].add(remitente)
-                        if c == "Wampus":
-                            usados_wampus.add(ALUMNOS.get(remitente, remitente))
-                        else:
-                            usados_rivales.add(remitente)
+                            if c == "Wampus":
+                                usados_wampus.add(ALUMNOS[remitente])
+                            else:
+                                usados_rivales.add(remitente)
                         break
             else:
                 if remitente in ALUMNOS:
