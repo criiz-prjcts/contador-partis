@@ -87,17 +87,19 @@ if st.button("🔍 Analizar participación"):
             mensaje_comp = normalizar(mensaje)
 
             if ":" in mensaje:
-                remitente = mensaje.split(":", 1)[0].strip()
+                remitente, cuerpo = mensaje.split(":", 1)
+                remitente = remitente.strip()
+                cuerpo = cuerpo.strip()
             else:
                 continue
 
             for alumno, emoji in ALUMNOS.items():
                 if normalizar(remitente) in normalizar(alumno) or normalizar(alumno) in normalizar(remitente):
                     mensajes_totales[alumno][idx_ronda].append(mensaje)
-                    contiene_respuesta = any(r in mensaje_comp for r in respuestas_comp)
-
+                    cuerpo_normalizado = normalizar(cuerpo)
+                    contiene_respuesta = any(r in cuerpo_normalizado for r in respuestas_comp)
                     contiene_emoji_de_cualquier_casa = any(
-                        normalizar(e) in mensaje_comp
+                        normalizar(e) in cuerpo_normalizado
                         for emojilist in CASAS.values()
                         for e in emojilist
                     )
@@ -107,14 +109,14 @@ if st.button("🔍 Analizar participación"):
                         mensajes_match[alumno][idx_ronda].append(mensaje)
 
                         for c, emojilist in CASAS.items():
-                            if any(normalizar(e) in mensaje_comp for e in emojilist):
+                            if any(normalizar(e) in cuerpo_normalizado for e in emojilist):
                                 aciertos_por_casa[c] += 1
                                 participantes_por_casa[c].add(emoji)
                                 break
 
-                        if any(normalizar(e) in mensaje_comp for e in CASAS["Wampus"]):
+                        if any(normalizar(e) in cuerpo_normalizado for e in CASAS["Wampus"]):
                             usados_wampus.add(emoji)
-                        elif any(normalizar(e) in mensaje_comp for casa_r in ["Thunder", "Pukukis", "Serpies"] for e in CASAS[casa_r]):
+                        elif any(normalizar(e) in cuerpo_normalizado for casa_r in ["Thunder", "Pukukis", "Serpies"] for e in CASAS[casa_r]):
                             usados_rivales.add(emoji)
                     else:
                         mensajes_no_match[alumno][idx_ronda].append(mensaje)
