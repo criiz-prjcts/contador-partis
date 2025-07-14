@@ -104,17 +104,17 @@ if st.button("🔍 Analizar participación"):
         else:
             st.write(f"{resumen} — {alumno}")
 
-            mostrar_detalle = st.checkbox(f"Ver detalle por ronda para {emoji}", key=f"ver_detalle_{emoji}")
-            if mostrar_detalle:
-                for i, estado in enumerate(desglose[alumno]):
-                    st.write(f"Ronda {i+1}: {'✔️' if estado else '❌'}")
-                    if estado:
-                        st.text_area(
-                            f"Mensajes que hicieron match en Ronda {i+1}",
-                            "\n\n".join(mensajes_match[alumno][i]),
-                            height=150,
-                            key=f"mensajes_{emoji}_r{i+1}"
-                        )
+            # Mostrar siempre el detalle por ronda (sin checkbox)
+            for i, estado in enumerate(desglose[alumno]):
+                st.write(f"Ronda {i+1}: {'✔️' if estado else '❌'}")
+                if estado:
+                    st.text_area(
+                        f"Mensajes que hicieron match en Ronda {i+1}",
+                        "\n\n".join(mensajes_match[alumno][i]),
+                        height=150,
+                        key=f"mensajes_{emoji}_r{i+1}"
+                    )
+
 
     st.subheader("🏠 Estadísticas por casa")
     st.write(f"Total de participantes con emojis de Wampus (❤️, ♥️): {len(usados_wampus)}")
