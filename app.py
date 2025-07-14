@@ -2,7 +2,6 @@ import streamlit as st
 import unicodedata
 import re
 from collections import defaultdict
-import emoji
 
 st.set_page_config(page_title="Contador de Participación", page_icon="📊")
 st.title("📊 Contador de Participación en Dinámicas")
