@@ -95,8 +95,7 @@ if st.button("🔍 Analizar participación"):
                     break
 
             if respuesta_encontrada:
-                # Eliminar la parte de la respuesta para obtener solo el contexto adicional
-                cuerpo_sin_respuesta = cuerpo.replace(respuesta_encontrada, "") if match_exacto else re.sub(re.escape(respuesta_encontrada), '', cuerpo_normalizado)
+                cuerpo_sin_respuesta = re.sub(re.escape(respuesta_encontrada), '', cuerpo, flags=re.IGNORECASE) if not match_exacto else cuerpo.replace(respuesta_encontrada, "")
                 encontrado = False
                 for c, emojilist in CASAS.items():
                     for emoji in emojilist:
@@ -147,9 +146,9 @@ if st.button("🔍 Analizar participación"):
         participantes = len(participantes_por_casa[casa_nombre])
         st.markdown(f"**{casa_nombre} {casa_emojis}:** {cuenta} respuestas correctas por {participantes} participantes")
 
-    st.code(f"{nombre_dinamica}\n{resumen.strip()}", language="text")
+    st.code(f"{nombre_dinamica}\n{resumen.strip()}", language="markdown")
 
-    st.subheader("📊 Otros emojis por ronda")
+    st.subheader("🔁 Resumen por ronda (otros emojis detectados)")
     for i in range(num_rondas):
-        if emojis_por_ronda[i]:
-            st.code(f"Ronda {i+1}: {''.join(emojis_por_ronda[i])}")
+        linea = ''.join(emojis_por_ronda[i])
+        st.code(f"Ronda {i+1}:\n{linea}", language="markdown")
