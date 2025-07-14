@@ -79,7 +79,7 @@ if st.button("🔍 Analizar participación"):
 
             # Extraer remitente
             if ":" in mensaje:
-                remitente = mensaje.split(":")[0].strip()
+                remitente = mensaje.split(":", 1)[0].strip()
             else:
                 continue  # saltar si no hay remitente claro
 
