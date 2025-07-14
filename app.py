@@ -1,6 +1,8 @@
+
 import streamlit as st
 import re
 import unicodedata
+from collections import defaultdict
 
 CASAS = {
     "Wampus": ["❤️", "♥️"],
@@ -61,8 +63,10 @@ if st.button("🔍 Analizar participación"):
 
     desglose = {alumno: [False]*num_rondas for alumno in ALUMNOS}
     mensajes_match = {alumno: [[] for _ in range(num_rondas)] for alumno in ALUMNOS}
+    mensajes_totales = {alumno: [[] for _ in range(num_rondas)] for alumno in ALUMNOS}
     usados_wampus = set()
     usados_rivales = set()
+    alumno_por_emoji = {v: k for k, v in ALUMNOS.items()}
 
     for idx_ronda in range(num_rondas):
         respuestas = respuestas_correctas[idx_ronda]
@@ -78,18 +82,17 @@ if st.button("🔍 Analizar participación"):
             contiene_respuesta = any(r in mensaje_comp for r in respuestas_comp)
             contiene_emocasa = any(e in mensaje_comp for e in emojis_casa_comp)
 
-            if contiene_respuesta and contiene_emocasa:
-                for alumno, emoji in ALUMNOS.items():
-                    emoji_comp = normalizar(emoji)
-                    if emoji_comp in mensaje_comp:
-                        if not desglose[alumno][idx_ronda]:
-                            desglose[alumno][idx_ronda] = True
-                            mensajes_match[alumno][idx_ronda].append(mensaje)
-
-                            if any(e in mensaje for e in CASAS["Wampus"]):
-                                usados_wampus.add(emoji)
-                            elif any(e in mensaje for casa in ["Thunder", "Pukukis", "Serpientes"] for e in CASAS[casa]):
-                                usados_rivales.add(emoji)
+            for alumno, emoji in ALUMNOS.items():
+                emoji_comp = normalizar(emoji)
+                if emoji_comp in mensaje_comp:
+                    mensajes_totales[alumno][idx_ronda].append(mensaje)
+                    if contiene_respuesta and contiene_emocasa and not desglose[alumno][idx_ronda]:
+                        desglose[alumno][idx_ronda] = True
+                        mensajes_match[alumno][idx_ronda].append(mensaje)
+                        if any(e in mensaje for e in CASAS["Wampus"]):
+                            usados_wampus.add(emoji)
+                        elif any(e in mensaje for casa in ["Thunder", "Pukukis", "Serpientes"] for e in CASAS[casa]):
+                            usados_rivales.add(emoji)
 
     mostrar_resumen = st.checkbox("Mostrar resumen compacto (solo emoji y resultado)")
 
@@ -102,19 +105,24 @@ if st.button("🔍 Analizar participación"):
         if mostrar_resumen:
             st.write(resumen)
         else:
-            st.write(f"{resumen} — {alumno}")
-
-            # Mostrar siempre el detalle por ronda (sin checkbox)
+            st.markdown(f"### {emoji} {alumno}")
             for i, estado in enumerate(desglose[alumno]):
                 st.write(f"Ronda {i+1}: {'✔️' if estado else '❌'}")
                 if estado:
                     st.text_area(
-                        f"Mensajes que hicieron match en Ronda {i+1}",
+                        f"✔️ Mensajes que hicieron match (R{i+1})",
                         "\n\n".join(mensajes_match[alumno][i]),
-                        height=150,
-                        key=f"mensajes_{emoji}_r{i+1}"
+                        height=140,
+                        key=f"ok_{emoji}_r{i+1}"
                     )
-
+                sin_match = set(mensajes_totales[alumno][i]) - set(mensajes_match[alumno][i])
+                if sin_match:
+                    st.text_area(
+                        f"📝 Mensajes encontrados SIN match (R{i+1})",
+                        "\n\n".join(sin_match),
+                        height=140,
+                        key=f"no_{emoji}_r{i+1}"
+                    )
 
     st.subheader("🏠 Estadísticas por casa")
     st.write(f"Total de participantes con emojis de Wampus (❤️, ♥️): {len(usados_wampus)}")
@@ -128,3 +136,22 @@ if st.button("🔍 Analizar participación"):
     st.subheader("📌 Uso individual de emojis Wampus")
     for emoji, count in emoji_wampus_conteo.items():
         st.write(f"{emoji} fue usado {count} veces en total")
+
+    st.subheader("📄 Resumen de la dinámica para copiar")
+    resumen = [nombre_ronda]
+    for alumno, emoji in ALUMNOS.items():
+        check = "✔️" if sum(desglose[alumno]) >= 5 else "❌"
+        total = sum(desglose[alumno])
+        resumen.append(f"{emoji} {check} ({total})")
+    st.code("\n".join(resumen), language="")
+
+    correctos_por_casa = defaultdict(int)
+    for alumno in ALUMNOS:
+        for i in range(num_rondas):
+            if desglose[alumno][i]:
+                for casa_nombre, casa_emojis in CASAS.items():
+                    if any(e in "".join(mensajes_match[alumno][i]) for e in casa_emojis):
+                        correctos_por_casa[casa_nombre] += 1
+    st.subheader("✅ Respuestas correctas por casa (por mensaje)")
+    for casa, total in correctos_por_casa.items():
+        st.write(f"{casa}: {total}")
