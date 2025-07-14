@@ -148,4 +148,4 @@ if st.button("🔍 Analizar participación"):
         participantes = len(participantes_por_casa[casa_nombre])
         st.markdown(f"**{casa_nombre} {casa_emojis}:** {cuenta} respuestas correctas por {participantes} participantes")
 
-    st.text_area("📋 Resumen final (para copiar)", value=f"{nombre_dinamica}\n{resumen.strip()}", height=200)
+    st.code(f"{nombre_dinamica}\n{resumen.strip()}", language="text")
