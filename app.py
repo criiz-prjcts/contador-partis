@@ -1,5 +1,6 @@
 import streamlit as st
 import re
+import unicodedata
 
 CASAS = {
     "Wampus": ["❤️", "♥️"],
@@ -51,6 +52,10 @@ texto_dinamica = st.text_area("Pega aquí todo el texto (incluye los timestamps)
 
 match_exacto = st.checkbox("Coincidencia exacta (distingue mayúsculas y minúsculas)", value=False)
 
+def normalizar(texto):
+    texto = unicodedata.normalize("NFKC", texto)
+    return texto.lower().replace("️", "") if not match_exacto else texto.replace("️", "")
+
 if st.button("🔍 Analizar participación"):
     mensajes = re.split(r"\[\d{1,2}:\d{2}, \d{1,2}/\d{1,2}(?:/\d{4})?\]", texto_dinamica)[1:]
 
@@ -66,16 +71,16 @@ if st.button("🔍 Analizar participación"):
             if not mensaje:
                 continue
 
-            mensaje_comp = mensaje if match_exacto else mensaje.lower()
-            respuestas_comp = respuestas if match_exacto else [r.lower() for r in respuestas]
-            emojis_casa_comp = emojis_casa if match_exacto else [e.lower() for e in emojis_casa]
+            mensaje_comp = normalizar(mensaje)
+            respuestas_comp = respuestas if match_exacto else [normalizar(r) for r in respuestas]
+            emojis_casa_comp = emojis_casa if match_exacto else [normalizar(e) for e in emojis_casa]
 
             contiene_respuesta = any(r in mensaje_comp for r in respuestas_comp)
             contiene_emocasa = any(e in mensaje_comp for e in emojis_casa_comp)
 
             if contiene_respuesta and contiene_emocasa:
                 for alumno, emoji in ALUMNOS.items():
-                    emoji_comp = emoji if match_exacto else emoji.lower()
+                    emoji_comp = normalizar(emoji)
                     if emoji_comp in mensaje_comp:
                         if not desglose[alumno][idx_ronda]:
                             desglose[alumno][idx_ronda] = True
@@ -115,7 +120,6 @@ if st.button("🔍 Analizar participación"):
     st.write(f"Total de participantes con emojis de Wampus (❤️, ♥️): {len(usados_wampus)}")
     st.write(f"Total con emojis de casas rivales (💙, 💛, 💚): {len(usados_rivales)}")
 
-    # Conteo individual de emojis de Wampus
     emoji_wampus_conteo = {"❤️": 0, "♥️": 0}
     for mensaje in mensajes:
         for emoji in emoji_wampus_conteo:
