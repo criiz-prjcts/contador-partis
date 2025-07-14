@@ -41,7 +41,7 @@ texto_dinamica = st.text_area("Pega aquí todo el texto de la dinámica")
 
 if st.button("🔍 Analizar participación"):
     mensajes = re.split(r"\[\d{1,2}:\d{2}, \d{1,2}/\d{1,2}(?:/\d{4})?\]", texto_dinamica)[1:]
-    desglose = defaultdict(lambda: [False]*num_rondas)
+    desglose = {alumno: [False]*num_rondas for alumno in ALUMNOS}
     mensajes_match = defaultdict(lambda: defaultdict(list))
     mensajes_no_match = defaultdict(lambda: defaultdict(list))
     aciertos_por_casa = {casa: 0 for casa in CASAS}
@@ -71,18 +71,19 @@ if st.button("🔍 Analizar participación"):
             if contiene_respuesta:
                 for c, emojilist in CASAS.items():
                     if any(e in cuerpo for e in emojilist):
-                        desglose[remitente][idx_ronda] = True
-                        mensajes_match[remitente][idx_ronda].append(mensaje)
+                        if remitente in ALUMNOS:
+                            desglose[remitente][idx_ronda] = True
+                            mensajes_match[remitente][idx_ronda].append(mensaje)
                         aciertos_por_casa[c] += 1
                         participantes_por_casa[c].add(remitente)
                         if c == "Wampus":
-                            emoji = ALUMNOS.get(remitente, remitente)
-                            usados_wampus.add(emoji)
+                            usados_wampus.add(ALUMNOS.get(remitente, remitente))
                         else:
                             usados_rivales.add(remitente)
                         break
             else:
-                mensajes_no_match[remitente][idx_ronda].append(mensaje)
+                if remitente in ALUMNOS:
+                    mensajes_no_match[remitente][idx_ronda].append(mensaje)
 
     st.header("📋 Resultados")
     resumen = ""
