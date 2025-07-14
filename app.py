@@ -90,13 +90,8 @@ if st.button("🔍 Analizar participación"):
             cuerpo_normalizado = normalizar(cuerpo)
             contiene_respuesta = any(r in cuerpo_normalizado for r in respuestas_comp)
 
-            # Registrar todos los emojis de casa que aparecen en el mensaje
-            for c, emojilist in CASAS.items():
-                for emoji in emojilist:
-                    if emoji in cuerpo:
-                        emojis_por_ronda[idx_ronda].append(emoji)
-
             if contiene_respuesta:
+                encontrado = False
                 for c, emojilist in CASAS.items():
                     if any(e in cuerpo for e in emojilist):
                         aciertos_por_casa[c] += 1
@@ -108,7 +103,14 @@ if st.button("🔍 Analizar participación"):
                                 usados_wampus.add(ALUMNOS[remitente])
                             else:
                                 usados_rivales.add(remitente)
+                        encontrado = True
                         break
+
+                if encontrado:
+                    for c, emojilist in CASAS.items():
+                        for emoji in emojilist:
+                            if emoji in cuerpo:
+                                emojis_por_ronda[idx_ronda].append(emoji)
             else:
                 if remitente in ALUMNOS:
                     mensajes_no_match[remitente][idx_ronda].append(mensaje)
