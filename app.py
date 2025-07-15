@@ -61,7 +61,9 @@ for i in range(num_rondas):
 texto_dinamica = st.text_area("Pega aquí todo el texto de la dinámica")
 
 if st.button("🔍 Analizar participación"):
-    mensajes = re.split(r"\[\d{1,2}:\d{2}, \d{1,2}/\d{1,2}(?:/\d{4})?\]", texto_dinamica)[1:]
+    patron_mensaje = r"\[(\d{1,2}:\d{2}, \d{1,2}/\d{1,2}(?:/\d{4})?)\] ([^:\n]+): (.+?)(?=\n?\[\d{1,2}:\d{2}, \d{1,2}/\d{1,2}(?:/\d{4})?\]|$)"
+    mensajes = re.findall(patron_mensaje, texto_dinamica, re.DOTALL)
+
     desglose = {alumno: [False]*num_rondas for alumno in ALUMNOS}
     mensajes_match = defaultdict(lambda: defaultdict(list))
     mensajes_no_match = defaultdict(lambda: defaultdict(list))
@@ -75,17 +77,9 @@ if st.button("🔍 Analizar participación"):
         respuestas = respuestas_correctas[idx_ronda]
         respuestas_comp = respuestas if match_exacto else [normalizar(r) for r in respuestas]
 
-        for mensaje in mensajes:
-            mensaje = mensaje.replace("\n", " ").strip()
-            if not mensaje:
-                continue
-
-            if ":" in mensaje:
-                remitente, cuerpo = mensaje.split(":", 1)
-                remitente = remitente.strip()
-                cuerpo = cuerpo.strip()
-            else:
-                continue
+        for _, remitente, cuerpo in mensajes:
+            remitente = remitente.strip()
+            cuerpo = cuerpo.strip()
 
             respuesta_encontrada = None
             for original in respuestas:
@@ -104,7 +98,7 @@ if st.button("🔍 Analizar participación"):
                             emojis_por_ronda[idx_ronda].append(emoji)
                             if remitente in ALUMNOS:
                                 desglose[remitente][idx_ronda] = True
-                                mensajes_match[remitente][idx_ronda].append(mensaje)
+                                mensajes_match[remitente][idx_ronda].append(f"{remitente}: {cuerpo}")
                                 if c == "Wampus":
                                     usados_wampus.add(ALUMNOS[remitente])
                                 else:
@@ -115,7 +109,7 @@ if st.button("🔍 Analizar participación"):
                         break
             else:
                 if remitente in ALUMNOS:
-                    mensajes_no_match[remitente][idx_ronda].append(mensaje)
+                    mensajes_no_match[remitente][idx_ronda].append(f"{remitente}: {cuerpo}")
 
     st.header("📋 Resultados")
     resumen = ""
