@@ -12,6 +12,15 @@ def normalizar(texto):
     texto = texto.replace("️", "").replace("\u200d", "")
     return texto.lower().strip() if not match_exacto else texto.strip()
 
+def contiene_todas_partes(cuerpo, partes):
+    cursor = 0
+    for parte in partes:
+        idx = cuerpo.find(parte, cursor)
+        if idx == -1:
+            return False
+        cursor = idx + len(parte)
+    return True
+
 # --- Diccionarios predefinidos ---
 ALUMNOS = {
     "h ~criiz🗺️": "🗺️",
@@ -87,12 +96,13 @@ if st.button("🔍 Analizar participación"):
 
             respuesta_encontrada = None
             for original in respuestas:
+                partes = original.strip().split()
                 if match_exacto:
-                    if original in cuerpo:
+                    if contiene_todas_partes(cuerpo, partes):
                         respuesta_encontrada = original
                         break
                 else:
-                    if normalizar(original) in normalizar(cuerpo):
+                    if contiene_todas_partes(normalizar(cuerpo), [normalizar(p) for p in partes]):
                         respuesta_encontrada = original
                         break
 
