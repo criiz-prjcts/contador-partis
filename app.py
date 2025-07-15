@@ -52,11 +52,16 @@ emojis_casa = CASAS[casa]
 nombre_dinamica = st.text_input("Nombre de la dinámica")
 num_rondas = st.number_input("¿Cuántas rondas hubo?", min_value=1, max_value=50, step=1)
 match_exacto = st.checkbox("¿Coincidencia exacta (mayúsculas y símbolos incluidos)?")
+agrupar_multilinea = st.checkbox("¿Agrupar líneas vacías como una sola respuesta compuesta?", value=False)
 
 respuestas_correctas = []
 for i in range(num_rondas):
-    respuestas = st.text_area(f"Respuesta(s) correcta(s) para la ronda {i+1} (una por línea)")
-    respuestas_correctas.append([r.strip() for r in respuestas.strip().splitlines() if r.strip()])
+    respuestas = st.text_area(f"Respuesta(s) correcta(s) para la ronda {i+1} (una por línea o separadas por doble línea si agrupas)")
+    if agrupar_multilinea:
+        bloques = respuestas.strip().split("\n\n")
+        respuestas_correctas.append([r.replace("\n", " ").strip() for r in bloques if r.strip()])
+    else:
+        respuestas_correctas.append([r.strip() for r in respuestas.strip().splitlines() if r.strip()])
 
 texto_dinamica = st.text_area("Pega aquí todo el texto de la dinámica")
 
