@@ -87,15 +87,16 @@ if st.button("🔍 Analizar participación"):
             else:
                 continue
 
-            cuerpo_normalizado = normalizar(cuerpo)
             respuesta_encontrada = None
-            for r in respuestas_comp:
-                if r in cuerpo_normalizado:
-                    respuesta_encontrada = r
+            respuesta_original = None
+
+            for original in respuestas:
+                if original in cuerpo if match_exacto else normalizar(original) in normalizar(cuerpo):
+                    respuesta_encontrada = original
                     break
 
             if respuesta_encontrada:
-                cuerpo_sin_respuesta = re.sub(re.escape(respuesta_encontrada), '', cuerpo, flags=re.IGNORECASE) if not match_exacto else cuerpo.replace(respuesta_encontrada, "")
+                cuerpo_sin_respuesta = cuerpo.replace(respuesta_encontrada, "")
                 encontrado = False
                 for c, emojilist in CASAS.items():
                     for emoji in emojilist:
@@ -146,9 +147,4 @@ if st.button("🔍 Analizar participación"):
         participantes = len(participantes_por_casa[casa_nombre])
         st.markdown(f"**{casa_nombre} {casa_emojis}:** {cuenta} respuestas correctas por {participantes} participantes")
 
-    st.code(f"{nombre_dinamica}\n{resumen.strip()}", language="markdown")
-
-    st.subheader("🔁 Resumen por ronda (otros emojis detectados)")
-    for i in range(num_rondas):
-        linea = ''.join(emojis_por_ronda[i])
-        st.code(f"Ronda {i+1}:\n{linea}", language="markdown")
+    st.text_area("📋 Resumen final (para copiar)", value=f"{nombre_dinamica}\n{resumen.strip()}", height=200)
