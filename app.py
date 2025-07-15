@@ -88,10 +88,8 @@ if st.button("🔍 Analizar participación"):
                 continue
 
             respuesta_encontrada = None
-            respuesta_original = None
-
             for original in respuestas:
-                if original in cuerpo if match_exacto else normalizar(original) in normalizar(cuerpo):
+                if (original in cuerpo) if match_exacto else (normalizar(original) in normalizar(cuerpo)):
                     respuesta_encontrada = original
                     break
 
@@ -147,4 +145,9 @@ if st.button("🔍 Analizar participación"):
         participantes = len(participantes_por_casa[casa_nombre])
         st.markdown(f"**{casa_nombre} {casa_emojis}:** {cuenta} respuestas correctas por {participantes} participantes")
 
-    st.text_area("📋 Resumen final (para copiar)", value=f"{nombre_dinamica}\n{resumen.strip()}", height=200)
+    st.code(f"{nombre_dinamica}\n{resumen.strip()}")
+
+    st.subheader("📦 Emojis por ronda (otros)")
+    for i in range(num_rondas):
+        secuencia = ''.join(emojis_por_ronda[i])
+        st.text(f"Ronda {i+1}: {secuencia}")
