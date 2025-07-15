@@ -80,7 +80,6 @@ if st.button("🔍 Analizar participación"):
 
     for idx_ronda in range(num_rondas):
         respuestas = respuestas_correctas[idx_ronda]
-        respuestas_comp = respuestas if match_exacto else [normalizar(r) for r in respuestas]
 
         for _, remitente, cuerpo in mensajes:
             remitente = remitente.strip()
@@ -88,9 +87,14 @@ if st.button("🔍 Analizar participación"):
 
             respuesta_encontrada = None
             for original in respuestas:
-                if (original in cuerpo) if match_exacto else (normalizar(original) in normalizar(cuerpo)):
-                    respuesta_encontrada = original
-                    break
+                if match_exacto:
+                    if original in cuerpo:
+                        respuesta_encontrada = original
+                        break
+                else:
+                    if normalizar(original) in normalizar(cuerpo):
+                        respuesta_encontrada = original
+                        break
 
             if respuesta_encontrada:
                 cuerpo_sin_respuesta = cuerpo.replace(respuesta_encontrada, "")
