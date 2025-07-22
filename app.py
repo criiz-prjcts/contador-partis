@@ -38,6 +38,7 @@ ALUMNOS = {
     "Tori 💎🇵🇾 Warriors": "💎",
     "Dani 🦕🇲🇽 Htr" : "🦕",
     "Roger 💀🇪🇨 Htr" : "💀",
+    "Idaly 🇲🇽 Lsdm" : "🧸",
     "Ludde 🎩🇨🇴 Warriors" : "💵",
     "Mari🃏💗 CUMH":"🃏",
     "Alexx 🧸🇲🇽 Bt" : "🧸",
